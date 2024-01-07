@@ -1,0 +1,13 @@
+{
+    "workbench.colorCustomizations": {
+        "activityBar.background": "#5C0046",
+        "titleBar.activeBackground": "#800062",
+        "titleBar.activeForeground": "#FFF9FE"
+    },
+    "cSpell.words": [
+        "clientbound",
+        "proto",
+        "repr",
+        "serverbound"
+    ]
+}
