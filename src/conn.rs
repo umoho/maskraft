@@ -1,32 +1,38 @@
 use std::net::TcpStream;
 
+use num_enum::{IntoPrimitive, TryFromPrimitive};
+
 pub struct Connection {
     stream: TcpStream,
-    state: i32,
+    state: State,
 }
 
 impl Connection {
     pub fn new(stream: TcpStream) -> Self {
-        Self { stream, state: 0 }
+        Self {
+            stream,
+            state: State::Init,
+        }
     }
 
     pub fn get_stream<'t>(&'t self) -> &'t TcpStream {
         &self.stream
     }
 
-    pub fn set_state(&mut self, state: i32) {
+    pub fn set_state(&mut self, state: State) {
         self.state = state;
+        log::debug!("Connection state changed to {:?}", self.state);
     }
 
-    pub fn handle<F>(mut self, handler: F) -> Self
+    pub fn handle<F>(mut self, mut handler: F) -> Self
     where
-        F: Fn(&mut Self),
+        F: FnMut(&mut Self),
     {
         handler(&mut self);
         self
     }
 
-    pub fn handle_when<F>(mut self, state: i32, mut handler: F) -> Self
+    pub fn handle_when<F>(mut self, state: State, mut handler: F) -> Self
     where
         F: FnMut(&mut Self),
     {
@@ -35,4 +41,12 @@ impl Connection {
         }
         self
     }
+}
+
+#[derive(Debug, PartialEq, IntoPrimitive, TryFromPrimitive)]
+#[repr(i32)]
+pub enum State {
+    Init,
+    Status = 0x01,
+    Login = 0x02,
 }

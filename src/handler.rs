@@ -1,6 +1,6 @@
 use std::io::{Read, Write};
 
-use maskraft::conn::Connection;
+use crate::conn::{Connection, State};
 use proto::clientbound::{LoginDisconnect, StatusResponse};
 use proto::datatype::Encode;
 use proto::packet::{Packet, PacketParser};
@@ -13,7 +13,8 @@ pub(crate) fn handshake<const N: usize>(conn: &mut Connection) {
     let handshake = Packet::decode(&buf, Handshake::decoder).unwrap();
     log::trace!("(recv) Handshake: {:?}", &handshake);
 
-    conn.set_state(handshake.data.next_state.into());
+    let next_state = Into::<i32>::into(handshake.data.next_state);
+    conn.set_state(State::try_from(next_state).unwrap());
 }
 
 pub(crate) fn status<const N: usize>(conn: &mut Connection) {
