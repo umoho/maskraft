@@ -117,6 +117,12 @@ impl From<i32> for VarInt {
     }
 }
 
+impl From<VarInt> for i32 {
+    fn from(value: VarInt) -> Self {
+        value.0
+    }
+}
+
 #[test]
 fn test_var_int() {
     let integers = vec![
