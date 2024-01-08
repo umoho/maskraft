@@ -11,7 +11,7 @@ pub(crate) fn handshake<const N: usize>(conn: &mut Connection) {
     conn.get_stream().read(&mut buf).unwrap();
 
     let handshake = Packet::decode(&buf, Handshake::decoder).unwrap();
-    println!("## [R] Handshake: {:?}", &handshake);
+    log::trace!("(recv) Handshake: {:?}", &handshake);
 
     conn.set_state(handshake.data.next_state.into());
 }
@@ -21,7 +21,7 @@ pub(crate) fn status<const N: usize>(conn: &mut Connection) {
     conn.get_stream().read(&mut buf).unwrap();
 
     let status_request = Packet::decode(&buf, StatusRequest::decoder).unwrap();
-    println!("## [R] Status Request: {:?}", &status_request);
+    log::trace!("(recv) Status Request: {:?}", &status_request);
 
     let protocol_version = 765;
     let packet = Packet::new(
@@ -43,9 +43,8 @@ pub(crate) fn status<const N: usize>(conn: &mut Connection) {
             }),
         },
     );
-    println!("## [W] Status Response: {:?}", &packet);
-
     conn.get_stream().write(&packet.encode()).unwrap();
+    log::trace!("(sent) Status Response: {:?}", &packet);
 }
 
 pub(crate) fn login<const N: usize>(conn: &mut Connection) {
@@ -56,7 +55,7 @@ pub(crate) fn login<const N: usize>(conn: &mut Connection) {
 
     if packet_id == 0x00 {
         let login_start = Packet::decode(&buf, LoginStart::decoder).unwrap();
-        println!("### [R] Login Start: {:?}", &login_start);
+        log::trace!("(recv) Login Start: {:?}", &login_start);
 
         // refuse login
         let msg = &format!(
@@ -71,8 +70,7 @@ pub(crate) fn login<const N: usize>(conn: &mut Connection) {
                 }),
             },
         );
-        println!("### [W] Disconnect: {:?}", &disconnect);
-
         conn.get_stream().write(&disconnect.encode()).unwrap();
+        log::trace!("(sent) Disconnect: {:?}", &disconnect);
     }
 }

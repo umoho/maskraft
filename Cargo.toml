@@ -9,4 +9,6 @@ edition = "2021"
 members = [".", "proto"]
 
 [dependencies]
+log = "0.4.20"
 proto = { path = "proto" }
+simple_logger = "4.3.3"
