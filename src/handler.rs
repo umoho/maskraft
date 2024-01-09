@@ -10,6 +10,11 @@ pub(crate) fn handshake<const N: usize>(conn: &mut Connection) {
     let mut buf = [0; N];
     conn.get_stream().read(&mut buf).unwrap();
 
+    if buf[0] == 0xfe {
+        log::debug!("Received a legacy handshake packet, ignoring it");
+        return;
+    }
+
     let handshake = Packet::decode(&buf, Handshake::decoder).unwrap();
     log::trace!("(recv) Handshake: {:?}", &handshake);
 

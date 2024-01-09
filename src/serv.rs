@@ -21,7 +21,7 @@ impl Server {
         for stream in self.socket.incoming() {
             std::thread::spawn(move || {
                 let stream = stream.unwrap();
-                log::debug!("Accepted client from {}", stream.peer_addr().unwrap());
+                log::info!("Accepted client from {}", stream.peer_addr().unwrap());
 
                 Connection::new(stream)
                     .handle(handler::handshake::<0xff>)
