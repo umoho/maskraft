@@ -1,4 +1,6 @@
-use crate::datatype::{Encode, Length};
+use crate::datatype::{Encode, Length, VarInt};
+
+use super::Clientbound;
 
 #[derive(Debug)]
 pub struct Disconnect {
@@ -15,5 +17,11 @@ impl Encode for Disconnect {
 impl Length<i32> for Disconnect {
     fn length(&self) -> i32 {
         self.encode().len() as i32
+    }
+}
+
+impl Clientbound for Disconnect {
+    fn packet_id() -> VarInt {
+        VarInt(0x00)
     }
 }

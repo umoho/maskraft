@@ -1,4 +1,6 @@
-use crate::datatype::{Encode, Length};
+use crate::datatype::{Encode, Length, VarInt};
+
+use super::Clientbound;
 
 #[derive(Debug)]
 pub struct StatusResponse {
@@ -15,5 +17,11 @@ impl Encode for StatusResponse {
 impl Length<i32> for StatusResponse {
     fn length(&self) -> i32 {
         self.encode().len() as i32
+    }
+}
+
+impl Clientbound for StatusResponse {
+    fn packet_id() -> VarInt {
+        VarInt(0x00)
     }
 }

@@ -1,4 +1,5 @@
 use crate::{
+    clientbound::Clientbound,
     datatype::{Decode, Encode, Length, VarInt},
     serverbound::Serverbound,
     Result,
@@ -39,7 +40,7 @@ impl<T> Packet<T>
 where
     T: Serverbound,
 {
-    pub fn decode<F>(bytes: &[u8], data_decoder: F) -> Result<Self>
+    pub fn from_bytes<F>(bytes: &[u8], data_decoder: F) -> Result<Self>
     where
         F: FnOnce(&mut BytesParser) -> Result<T>,
     {
@@ -51,7 +52,7 @@ impl<T> Packet<T>
 where
     T: Length<i32>,
 {
-    pub fn new(packet_id: impl Into<VarInt>, data: T) -> Self {
+    pub(crate) fn new_raw(packet_id: impl Into<VarInt>, data: T) -> Self {
         let packet_id = packet_id.into();
         let length = VarInt(packet_id.length() + data.length());
         Self {
@@ -72,6 +73,15 @@ where
         buf.extend(&self.packet_id.encode());
         buf.extend(&self.data.encode());
         buf
+    }
+}
+
+impl<T> Packet<T>
+where
+    T: Clientbound + Length<i32>,
+{
+    pub fn new(data: T) -> Self {
+        Self::new_raw(<T as Clientbound>::packet_id(), data)
     }
 }
 
