@@ -62,6 +62,7 @@ pub(crate) fn login<const N: usize>(conn: &mut Connection) {
         let login_start = Packet::from_bytes(&buf, LoginStart::decoder).unwrap();
         log::trace!("(recv) Login Start: {:?}", &login_start);
 
+        std::thread::sleep(std::time::Duration::from_secs(3));
         // refuse login
         let msg = &format!(
             "Sorry {}, this server is not yet prepared to connect.",

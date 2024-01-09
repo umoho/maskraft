@@ -31,4 +31,5 @@ fn test_string() {
     let bytes = string.to_string().encode();
     println!("{:0x?}", &bytes);
     println!("{:?}", String::decode_streaming(&bytes));
+    println!("length: {}", string.to_string().length());
 }

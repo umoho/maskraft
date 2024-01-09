@@ -1,15 +1,5 @@
 mod tests;
 
-pub type Boolean = bool;
-pub type Byte = i8;
-pub type UnsignedByte = u8;
-pub type Short = i16;
-pub type UnsignedShort = u16;
-pub type Int = i32;
-pub type Long = i64;
-pub type Float = f32;
-pub type Double = f64;
-
 pub trait Encode {
     fn encode(&self) -> Vec<u8>;
 }
@@ -30,6 +20,20 @@ pub trait Length<T> {
     fn length(&self) -> T;
 }
 
+pub type Boolean = bool;
+
+impl Encode for Boolean {
+    fn encode(&self) -> Vec<u8> {
+        vec![if *self { 0x01 } else { 0x00 }]
+    }
+}
+
+pub type Byte = i8;
+pub type UnsignedByte = u8;
+pub type Short = i16;
+
+pub type UnsignedShort = u16;
+
 impl Decode for UnsignedShort {
     type Error = crate::Error;
 
@@ -38,6 +42,10 @@ impl Decode for UnsignedShort {
         Ok((2, unsigned_short))
     }
 }
+
+pub type Int = i32;
+
+pub type Long = i64;
 
 impl Decode for Long {
     type Error = crate::Error;
@@ -54,6 +62,9 @@ impl Decode for Long {
         Ok((8, long))
     }
 }
+
+pub type Float = f32;
+pub type Double = f64;
 
 const SEGMENT_BITS: u8 = 0x7f;
 const CONTINUE_BIT: u8 = 0x80;
@@ -157,7 +168,21 @@ impl Decode for String {
     }
 }
 
+impl Length<i32> for String {
+    fn length(&self) -> i32 {
+        let str_len = self.len() as i32;
+        let prefix_len = VarInt(str_len).length();
+        prefix_len + str_len
+    }
+}
+
 pub use uuid::Uuid;
+
+impl Encode for Uuid {
+    fn encode(&self) -> Vec<u8> {
+        self.as_bytes().to_vec()
+    }
+}
 
 impl Decode for Uuid {
     type Error = crate::Error;
