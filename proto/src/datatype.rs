@@ -1,3 +1,5 @@
+mod tests;
+
 pub type Boolean = bool;
 pub type Byte = i8;
 pub type UnsignedByte = u8;
@@ -101,7 +103,7 @@ impl Decode for VarInt {
 
             pos += 7;
             if pos >= 32 {
-                return Err(crate::Error::DecodeError("VarInt is too big")); // todo: need more testing
+                return Err(crate::Error::DecodeError("VarInt is too big"));
             }
         }
 
@@ -133,29 +135,6 @@ impl From<VarInt> for i32 {
     }
 }
 
-#[test]
-fn test_var_int() {
-    let integers = vec![
-        0,
-        1,
-        2,
-        127,
-        128,
-        255,
-        25565,
-        2097151,
-        2147483647,
-        // -1, // todo: something wrong here
-        -2147483648,
-    ];
-    for i in integers {
-        let var_int = VarInt(i);
-        let bytes = var_int.encode();
-        println!("{:0x?}", &bytes);
-        println!("{:?}", VarInt::decode(&bytes));
-    }
-}
-
 impl Encode for String {
     fn encode(&self) -> Vec<u8> {
         let len = self.len();
@@ -176,14 +155,6 @@ impl Decode for String {
             .map_err(|_| crate::Error::DecodeError("Utf8Error while decoding string"))?;
         Ok((str_end, String::from(string)))
     }
-}
-
-#[test]
-fn test_string() {
-    let string = "hello world";
-    let bytes = string.to_string().encode();
-    println!("{:0x?}", &bytes);
-    println!("{:?}", String::decode_streaming(&bytes));
 }
 
 pub use uuid::Uuid;
