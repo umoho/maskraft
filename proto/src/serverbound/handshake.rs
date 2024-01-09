@@ -1,4 +1,8 @@
-use crate::{datatype::VarInt, packet::BytesParser, Result};
+use crate::{
+    datatype::{UnsignedShort, VarInt},
+    packet::BytesParser,
+    Result,
+};
 
 use super::Serverbound;
 
@@ -6,7 +10,7 @@ use super::Serverbound;
 pub struct Handshake {
     pub protocol_version: VarInt,
     pub server_address: String,
-    pub server_port: u16,
+    pub server_port: UnsignedShort,
     pub next_state: VarInt,
 }
 

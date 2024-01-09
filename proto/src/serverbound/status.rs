@@ -1,4 +1,4 @@
-use crate::{packet::BytesParser, Result};
+use crate::{datatype::Long, packet::BytesParser, Result};
 
 use super::Serverbound;
 
@@ -13,7 +13,7 @@ impl Serverbound for StatusRequest {
 
 #[derive(Debug)]
 pub struct StatusPingRequest {
-    pub payload: i64,
+    pub payload: Long,
 }
 
 impl Serverbound for StatusPingRequest {

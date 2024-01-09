@@ -1,3 +1,13 @@
+pub type Boolean = bool;
+pub type Byte = i8;
+pub type UnsignedByte = u8;
+pub type Short = i16;
+pub type UnsignedShort = u16;
+pub type Int = i32;
+pub type Long = i64;
+pub type Float = f32;
+pub type Double = f64;
+
 pub trait Encode {
     fn encode(&self) -> Vec<u8>;
 }
@@ -18,7 +28,7 @@ pub trait Length<T> {
     fn length(&self) -> T;
 }
 
-impl Decode for u16 {
+impl Decode for UnsignedShort {
     type Error = crate::Error;
 
     fn decode_streaming(bytes: &[u8]) -> Result<(usize, Self), Self::Error> {
@@ -27,7 +37,7 @@ impl Decode for u16 {
     }
 }
 
-impl Decode for i64 {
+impl Decode for Long {
     type Error = crate::Error;
 
     fn decode_streaming(bytes: &[u8]) -> Result<(usize, Self), Self::Error> {
@@ -174,4 +184,18 @@ fn test_string() {
     let bytes = string.to_string().encode();
     println!("{:0x?}", &bytes);
     println!("{:?}", String::decode_streaming(&bytes));
+}
+
+pub use uuid::Uuid;
+
+impl Decode for Uuid {
+    type Error = crate::Error;
+
+    fn decode_streaming(bytes: &[u8]) -> Result<(usize, Self), Self::Error> {
+        let uuid_bytes = bytes[..16]
+            .try_into()
+            .map_err(|_| crate::Error::DecodeError("Slice length must be 16"))?;
+        let uuid = Uuid::from_bytes(uuid_bytes);
+        Ok((16, uuid))
+    }
 }
