@@ -15,13 +15,13 @@ impl Connection {
         }
     }
 
-    pub fn get_stream<'t>(&'t self) -> &'t TcpStream {
+    pub fn stream<'t>(&'t self) -> &'t TcpStream {
         &self.stream
     }
 
-    pub fn set_state(&mut self, state: State) {
+    pub fn switch_state(&mut self, state: State) {
         self.state = state;
-        log::debug!("Connection state changed to {:?}", self.state);
+        log::debug!("Connection state switched to {:?}", self.state);
     }
 
     pub fn handle<F>(mut self, mut handler: F) -> Self

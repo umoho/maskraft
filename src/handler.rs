@@ -1,14 +1,16 @@
 use std::io::{Read, Write};
 
 use crate::conn::{Connection, State};
-use proto::clientbound::{LoginDisconnect, StatusResponse};
+use proto::clientbound::{login::Disconnect, status::StatusResponse};
 use proto::datatype::Encode;
 use proto::packet::{Packet, PacketParser};
-use proto::serverbound::{Handshake, LoginStart, Serverbound, StatusRequest};
+use proto::serverbound::{
+    handshake::Handshake, login::LoginStart, status::StatusRequest, Serverbound,
+};
 
 pub(crate) fn handshake<const N: usize>(conn: &mut Connection) {
     let mut buf = [0; N];
-    conn.get_stream().read(&mut buf).unwrap();
+    conn.stream().read(&mut buf).unwrap();
 
     if buf[0] == 0xfe {
         log::debug!("Received a legacy handshake packet, ignoring it");
@@ -19,12 +21,12 @@ pub(crate) fn handshake<const N: usize>(conn: &mut Connection) {
     log::trace!("(recv) Handshake: {:?}", &handshake);
 
     let next_state = Into::<i32>::into(handshake.data.next_state);
-    conn.set_state(State::try_from(next_state).unwrap());
+    conn.switch_state(State::try_from(next_state).unwrap());
 }
 
 pub(crate) fn status<const N: usize>(conn: &mut Connection) {
     let mut buf = [0; N];
-    conn.get_stream().read(&mut buf).unwrap();
+    conn.stream().read(&mut buf).unwrap();
 
     let status_request = Packet::decode(&buf, StatusRequest::decoder).unwrap();
     log::trace!("(recv) Status Request: {:?}", &status_request);
@@ -49,13 +51,13 @@ pub(crate) fn status<const N: usize>(conn: &mut Connection) {
             }),
         },
     );
-    conn.get_stream().write(&packet.encode()).unwrap();
+    conn.stream().write(&packet.encode()).unwrap();
     log::trace!("(sent) Status Response: {:?}", &packet);
 }
 
 pub(crate) fn login<const N: usize>(conn: &mut Connection) {
     let mut buf = [0; N];
-    conn.get_stream().read(&mut buf).unwrap();
+    conn.stream().read(&mut buf).unwrap();
 
     let packet_id = PacketParser::new(&buf).packet_id().unwrap();
 
@@ -70,13 +72,13 @@ pub(crate) fn login<const N: usize>(conn: &mut Connection) {
         );
         let disconnect = Packet::new(
             0x00,
-            LoginDisconnect {
+            Disconnect {
                 reason: proto::serde_json::json!({
                     "text": msg
                 }),
             },
         );
-        conn.get_stream().write(&disconnect.encode()).unwrap();
+        conn.stream().write(&disconnect.encode()).unwrap();
         log::trace!("(sent) Disconnect: {:?}", &disconnect);
     }
 }
